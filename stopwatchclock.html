@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stopwatch</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: pink;
+            background-size: cover;
+        }
+
+        .stopwatch {
+            text-align: center;
+            background-color: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+
+        #display {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        .controls button {
+            margin: 10px;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            cursor: pointer;
+        }
+
+        #laps {
+            list-style: none;
+            padding: 0;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        #laps li {
+            margin: 5px 0;
+            padding: 5px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="stopwatch">
+        <h1 id="display">00:00:00</h1>
+        <div class="controls">
+            <button id="start">Start</button>
+            <button id="stop">Stop</button>
+            <button id="reset">Reset</button>
+            <button id="lap">Lap</button>
+        </div>
+        <ul id="laps"></ul>
+    </div>
+    <script>
+        let startTime;
+        let updatedTime;
+        let difference;
+        let tInterval;
+        let running = false;
+        let lapTimes = [];
+
+        const display = document.getElementById('display');
+        const startButton = document.getElementById('start');
+        const stopButton = document.getElementById('stop');
+        const resetButton = document.getElementById('reset');
+        const lapButton = document.getElementById('lap');
+        const lapsList = document.getElementById('laps');
+
+        startButton.addEventListener('click', start);
+        stopButton.addEventListener('click', stop);
+        resetButton.addEventListener('click', reset);
+        lapButton.addEventListener('click', lap);
+
+        function start() {
+            if (!running) {
+                startTime = new Date().getTime() - difference;
+                tInterval = setInterval(getShowTime, 1000); // Update every second
+                running = true;
+                startButton.disabled = true;
+                stopButton.disabled = false;
+                lapButton.disabled = false;
+            }
+        }
+
+        function stop() {
+            if (running) {
+                clearInterval(tInterval);
+                difference = new Date().getTime() - startTime;
+                running = false;
+                startButton.disabled = false;
+                stopButton.disabled = true;
+                lapButton.disabled = true;
+            }
+        }
+
+        function reset() {
+            clearInterval(tInterval);
+            running = false;
+            difference = 0;
+            display.innerHTML = '00:00:00';
+            lapsList.innerHTML = '';
+            lapTimes = [];
+            startButton.disabled = false;
+            stopButton.disabled = true;
+            lapButton.disabled = true;
+        }
+
+        function lap() {
+            if (running) {
+                lapTimes.push(difference);
+                const lapTime = formatTime(difference);
+                const li = document.createElement('li');
+                li.textContent = lapTime;
+                lapsList.appendChild(li);
+            }
+        }
+
+        function getShowTime() {
+            updatedTime = new Date().getTime();
+            difference = updatedTime - startTime;
+            display.innerHTML = formatTime(difference);
+        }
+
+        function formatTime(ms) {
+            const seconds = Math.floor((ms / 1000) % 60);
+            const minutes = Math.floor((ms / (1000 * 60)) % 60);
+            const hours = Math.floor((ms / (1000 * 60 * 60)) % 24);
+            return (
+                (hours < 10 ? '0' : '') + hours + ':' +
+                (minutes < 10 ? '0' : '') + minutes + ':' +
+                (seconds < 10 ? '0' : '') + seconds
+            );
+        }
+    </script>
+</body>
+</html>
